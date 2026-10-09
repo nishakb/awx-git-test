@@ -1,0 +1,7 @@
+---
+all:
+  hosts:
+    ubuntu-host:
+      ansible_host: 13.220.50.156
+    rhel-host:
+      ansible_host: 18.207.151.24
