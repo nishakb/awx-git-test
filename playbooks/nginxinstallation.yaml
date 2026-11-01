@@ -1,17 +1,24 @@
 ---
 - hosts: all
   tasks:
-    - name: Update apt cache
-      apt:
+    - name: Update apt cache on Debian/Ubuntu
+      ansible.builtin.apt:
         update_cache: yes
+      when: ansible_os_family == "Debian"
 
-    - name: Install Nginx package
-      apt:
+    - name: Update DNF cache on RHEL
+      ansible.builtin.dnf:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Nginx
+      ansible.builtin.package:
         name: nginx
         state: present
 
-    - name: Start and enable Nginx service
-      service:
+    - name: Start and enable Nginx
+      ansible.builtin.service:
         name: nginx
         state: started
         enabled: yes
+  
