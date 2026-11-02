@@ -1,0 +1,36 @@
+---
+- name: Uninstall Nginx from all servers
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Stop and disable Nginx service
+      ansible.builtin.service:
+        name: nginx
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Uninstall Nginx from Debian/Ubuntu
+      ansible.builtin.apt:
+        name: nginx
+        state: absent
+        purge: true
+        autoremove: true
+      when: ansible_os_family == "Debian"
+
+    - name: Uninstall Nginx from RHEL
+      ansible.builtin.dnf:
+        name: nginx
+        state: absent
+      when: ansible_os_family == "RedHat"
+
+    - name: Verify Nginx package is removed
+      ansible.builtin.command: nginx -v
+      register: nginx_check
+      changed_when: false
+      failed_when: nginx_check.rc == 0
+
+    - name: Display uninstall result
+      ansible.builtin.debug:
+        msg: "Nginx has been removed successfully from {{ inventory_hostname }}"
