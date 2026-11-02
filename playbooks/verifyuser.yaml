@@ -1,0 +1,14 @@
+---
+- name: Verify nisha user on Ubuntu and RHEL
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Check whether nisha user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: nisha
+
+    - name: Display nisha user details
+      ansible.builtin.debug:
+        var: ansible_facts.getent_passwd["nisha"]
