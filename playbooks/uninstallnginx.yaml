@@ -1,6 +1,7 @@
 ---
 - name: Uninstall Nginx from all servers
   hosts: all
+  become: true
   gather_facts: true
 
   tasks:
@@ -9,28 +10,37 @@
         name: nginx
         state: stopped
         enabled: false
-      ignore_errors: true
+      failed_when: false
 
-    - name: Uninstall Nginx from Debian/Ubuntu
+    - name: Remove Nginx from Debian/Ubuntu
       ansible.builtin.apt:
-        name: nginx
+        name:
+          - nginx
+          - nginx-common
+          - nginx-core
         state: absent
         purge: true
         autoremove: true
       when: ansible_os_family == "Debian"
 
-    - name: Uninstall Nginx from RHEL
+    - name: Remove Nginx packages from RHEL
       ansible.builtin.dnf:
-        name: nginx
+        name:
+          - nginx
+          - nginx-core
+          - nginx-filesystem
         state: absent
       when: ansible_os_family == "RedHat"
 
-    - name: Verify Nginx package is removed
+    - name: Check whether Nginx command still exists
       ansible.builtin.command: nginx -v
       register: nginx_check
       changed_when: false
-      failed_when: nginx_check.rc == 0
+      failed_when: false
 
-    - name: Display uninstall result
-      ansible.builtin.debug:
-        msg: "Nginx has been removed successfully from {{ inventory_hostname }}"
+    - name: Confirm Nginx removal
+      ansible.builtin.assert:
+        that:
+          - nginx_check.rc != 0
+        success_msg: "Nginx has been completely removed from {{ inventory_hostname }}"
+        fail_msg: "Nginx is still installed on {{ inventory_hostname }}"
