@@ -1,0 +1,13 @@
+---
+- name: Create nisha user on Ubuntu and RHEL
+  hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+    - name: Create user nisha
+      ansible.builtin.user:
+        name: nisha
+        state: present
+        create_home: true
+        shell: /bin/bash
